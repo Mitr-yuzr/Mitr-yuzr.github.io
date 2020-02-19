@@ -1,0 +1,200 @@
+<!DOCTYPE>
+<html>
+<head>
+	<title>专注力游戏1.0</title>
+	<script src="res/jquery-1.8.0.js"></script>
+	<script src="res/jquery.color.js"></script>
+	<style>
+		body{
+			background: #F9F9FA;
+		}
+		#div_btn{
+			position: absolute;
+			margin: auto;
+			padding: 5px;
+			top: 5px;
+			bottom: 5px;
+			left: 5px;
+			right: 5px;
+			background: #A4D8E9;
+			border-radius: 10px;
+		}
+		#div_next{
+			position: absolute;
+			margin: auto;
+			top: 5px;
+			right: 5px;
+		}
+		#div_time{
+			position: absolute;
+			margin: auto;
+			top: 5px;
+			left: 5px;
+		}
+		#div_level{
+			position: absolute;
+			margin: auto;
+			bottom: 5px;
+			left: 5px;
+		}
+		#div_score{
+			position: absolute;
+			margin: auto;
+			bottom: 5px;
+			right: 5px;
+		}
+		.startbtn{
+			position: absolute;
+			margin: auto;
+			top: 0px;
+			bottom: 0px;
+			left: 0px;
+			right: 0px;
+			width: 200px;
+			height: 50px;
+		}
+		input{
+			color: #FFFFFF;
+			font-size: 25px;
+			background: #00A1D6;
+			border-radius: 10px;
+			border-style: none;
+			outline: none;
+		}
+	</style>
+</head>
+<body>
+	<div id="div_time">
+		<font style="font-size:30px;color:#87CEEB">剩余时间</font><br/>
+		<font id="time" style="font-size:80px;color:#FFD700"></font>
+	</div>
+	<div id="div_next">
+		<font style="font-size:30px;color:#87CEEB">下一个</font><br/>
+		<font id="next" style="font-size:80px;color:#FFD700">1</font>
+	</div>
+	<div id="div_level">
+		<font id="level" style="font-size:80px;color:#FFD700">0</font><br/>
+		<font style="font-size:30px;color:#87CEEB">Level</font>
+	</div>
+	<div id="div_score">
+		<font id="score" style="font-size:80px;color:#FFD700">0</font><br/>
+		<font style="font-size:30px;color:#87CEEB">得分</font>
+	</div>
+	<div id="div_btn">
+		<input type='button' class='startbtn' id='btn0' onclick="showBtn()" onmouseenter="mouseenter(0)" onmouseleave="mouseleave(0)" value="开始"/>
+	</div>
+	<script>
+		var size = 2;
+		var score = 0;
+		var num = 1;
+		var time;
+		function getArr() {
+			var arr = [];
+			for(var i=0;i<size*size;i++) {
+				arr[i] = i+1;
+			}
+			return randomArr(arr);
+		}
+		function randomArr(arr) {
+			var len = arr.length;
+			for(var i=len-1;i>=0;i--){
+				var randomIndex = Math.floor(Math.random() * (i+1));
+				var itemIndex = arr[randomIndex];
+				arr[randomIndex] = arr[i];
+				arr[i] = itemIndex;
+			}
+			return arr;
+		}
+		function setTime() {
+			clearInterval(time);
+			var t = ((size-size%4)/4+2)*size*size;
+			var sec = t%60;
+			var min = (t-sec)/60;
+			$("#time").html(min+" : "+sec);
+			time = setInterval(function(){ 
+				if(sec==1&&min==0) {
+					sec--;
+					$("#time").css("color", "#FF6347");
+					$("*").attr("onclick", "");
+				}else if(sec==0&&min==0) {
+					
+				}else if(sec==0){
+					sec=59;
+					min--;
+				}else {	
+					sec--;
+				}
+				$("#time").html(min+" : "+sec);
+			}, 1000);
+		}
+		function mouseenter(id) {
+			$("#btn"+id).css("background", "#0083D6");
+		}
+		function mouseleave(id) {
+			$("#btn"+id).css("background", "#00A1D6");
+		}
+		function btnclick(id) {
+			$("#btn"+id).attr("onmouseenter", "").attr("onmouseleave", "");
+			if($("#btn"+id).attr("value") == num) {
+				score++;
+				num++;
+				$("#btn"+id).css("background", "#00FF7F");
+				$("#next").html(num);
+				$("#score").html(score);
+				var sid=score;
+				$("#div_score").prepend("<div id=\"s"+sid+"\" style=\"position: absolute;font-size:30px;color:#00FF7F;opacity: 1;bottom: 100px;\">+1<br/></div>");
+				$("#s"+sid).animate({opacity: 0, bottom: '140px'}, 500, function(){this.remove()});
+				$("#btn"+id).attr("onclick", "");
+				$("#btn"+id).animate({opacity: 0}, 800, function(){
+					if(num-1 == size*size) {
+						num=1;
+						size++;
+						showBtn();
+						$("#next").html(num);
+					}
+				});
+			}else {
+				score--;
+				$("#score").html(score);
+				var sid=score;
+				$("#div_score").prepend("<div id=\"s"+sid+"\" style=\"position: absolute;font-size:30px;color:#FF6347;opacity: 1;bottom: 100px;\">-1<br/></div>");
+				$("#s"+sid).animate({opacity: 0, bottom: '140px'}, 500, function(){this.remove()});
+				$("#btn"+id).css("background", "#FF6347");
+				$("#btn"+id).animate({backgroundColor: "#00A1D6"}, 1000, function(){$("#btn"+id).attr("onmouseenter", "mouseenter("+id+")").attr("onmouseleave", "mouseleave("+id+")");});
+			}
+		}
+		function showBtn() {
+			document.getElementById("div_btn").innerHTML = "";
+			$("#level").html(size-1);
+			num = 1;
+			var btnSize = (window.innerHeight-20) / 1.2 / size;
+			if(btnSize > 50)
+				btnSize = 50;
+			var lineSpace = btnSize / 5;
+			var btn = document.getElementById("div_btn");
+			var arr = getArr();
+			var v=0;
+			for(var j=1;j<size;j++) {
+				for(var i=1;i<size;i++) {
+					btn.innerHTML += "<input type='button' class='btn' id=\"btn"+v+"\" onclick=\"btnclick("+v+")\" onmouseenter=\"mouseenter("+v+")\" onmouseleave=\"mouseleave("+v+")\" value=\""+arr[v]+"\"/>"
+					v++;
+				}
+				btn.innerHTML += "<input type='button' class='linelastbtn' id=\"btn"+v+"\" onclick=\"btnclick("+v+")\" onmouseenter=\"mouseenter("+v+")\" onmouseleave=\"mouseleave("+v+")\" value=\""+arr[v]+"\"/>"
+				v++;
+			}
+			for(var i=1;i<size;i++) {
+				btn.innerHTML += "<input type='button' class='lastlinebtn' id=\"btn"+v+"\" onclick=\"btnclick("+v+")\" onmouseenter=\"mouseenter("+v+")\" onmouseleave=\"mouseleave("+v+")\" value=\""+arr[v]+"\"/>"
+				v++;
+			}
+			btn.innerHTML += "<input type='button' class='lastlastbtn' id=\"btn"+v+"\" onclick=\"btnclick("+v+")\" onmouseenter=\"mouseenter("+v+")\" onmouseleave=\"mouseleave("+v+")\" value=\""+arr[v]+"\"/>"
+			v++;
+			$("#div_btn").css("height", btnSize*size+lineSpace*(size-1)+"px").css("width", btnSize*size+lineSpace*(size-1)+"px");
+			$(".btn").css("margin-bottom", lineSpace+"px").css("margin-right", lineSpace+"px").css("height", btnSize+"px").css("width", btnSize+"px").css("border-radius", btnSize/5+"px").css("font-size", btnSize/2+"px");
+			$(".linelastbtn").css("margin-bottom", lineSpace+"px").css("height", btnSize+"px").css("width", btnSize+"px").css("width", btnSize+"px").css("border-radius", btnSize/5+"px").css("font-size", btnSize/2+"px");
+			$(".lastlinebtn").css("margin-right", lineSpace+"px").css("height", btnSize+"px").css("width", btnSize+"px").css("width", btnSize+"px").css("border-radius", btnSize/5+"px").css("font-size", btnSize/2+"px");
+			$(".lastlastbtn").css("height", btnSize+"px").css("width", btnSize+"px").css("width", btnSize+"px").css("border-radius", btnSize/5+"px").css("font-size", btnSize/2+"px");
+			setTime();
+		}
+	</script>
+</body>
+</html>
